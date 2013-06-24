@@ -1,0 +1,37 @@
+import vtkSlicerPlastimatchModuleLogicPython
+reg = vtkSlicerPlastimatchModuleLogicPython.vtkSlicerPlastimatchLogic()
+
+reg.SetMRMLScene(slicer.mrmlScene)
+
+img_fixed = "IMG1" 
+img_moving = "IMG2"
+
+reg.set_input_images(getNode(img_fixed).GetID(), getNode(img_moving).GetID())
+
+reg.add_stage()
+reg.set_par("xform", "align_center")
+
+reg.add_stage()
+reg.set_par("xform", "rigid")
+reg.set_par("optim", "versor")
+reg.set_par("impl", "itk")
+reg.set_par("metric", "mse")
+reg.set_par("max_its", "100")
+reg.set_par("convergence_tol", "5")
+reg.set_par("grad_tol", "1.5")
+reg.set_par("res", "1 1 1")
+
+reg.add_stage()
+reg.set_par("xform", "bspline")
+reg.set_par("optim", "lbfgsb")
+reg.set_par("impl", "plastimatch")
+reg.set_par("metric", "mse")
+reg.set_par("max_its", "150")
+reg.set_par("convergence_tol", "5")
+reg.set_par("grad_tol", "1.5")
+reg.set_par("res", "4 4 2")
+reg.set_par("grid_spac", "80 80 80")
+
+reg.run_plm()
+
+reg.get_output_img("OUTPUT_IMG")
