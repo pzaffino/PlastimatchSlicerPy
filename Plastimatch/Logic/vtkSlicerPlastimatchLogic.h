@@ -20,31 +20,25 @@
 // This class manages the logic associated with reading, saving,
 // and changing propertied of the volumes
 
-
 #ifndef __vtkSlicerPlastimatchLogic_h
 #define __vtkSlicerPlastimatchLogic_h
-
-#include <string.h>
 
 // Slicer includes
 #include "vtkSlicerModuleLogic.h"
 
-// MRML includes
-
 // STD includes
 #include <cstdlib>
+#include <string.h>
 
 #include "vtkSlicerPlastimatchModuleLogicExport.h"
 
+// Plastimatch includes 
 #include "plm_config.h"
-#include "plmregister.h"
-#include "plm_config.h"
-#include "plm_stages.h"
-#include "registration_parms.h"
-#include "registration_data.h"
-#include "plm_warp.h"
-#include "plm_image_header.h"
 #include "plm_image.h"
+#include "plm_stages.h"
+#include "pointset.h"
+#include "registration_data.h"
+#include "registration_parms.h"
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class VTK_SLICER_PLASTIMATCH_MODULE_LOGIC_EXPORT vtkSlicerPlastimatchLogic :
@@ -55,10 +49,11 @@ public:
   static vtkSlicerPlastimatchLogic *New();
   vtkTypeMacro(vtkSlicerPlastimatchLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
-  void run_plm();
-  void add_stage();
   void set_input_images(std::string fixed_id, std::string moving_id);
+  void set_input_landmarks(std::string fixed_landmark_fn, std::string moving_landmark_fn);
+  void add_stage();
   void set_par(std::string key, std::string val);
+  void run_registration(std::string output_image_name);
   void apply_warp(Plm_image *im_warped,   /* Output: Output image */
     Xform * xf_in,          /* Input:  Input image warped by this xform */
     Plm_image * fixed_img,   /* Input:  Size of output image */
@@ -87,9 +82,11 @@ public:
   Registration_parms *regp;
   Registration_data *regd;
   Xform* xf_out;
-  Plm_image * warped_img;
   std::string fixed_id;
   std::string moving_id;
+  Plm_image * warped_img;
+  Labeled_pointset* fixed_landmarks;
+  Labeled_pointset* moving_landmarks;
 };
 
 #endif

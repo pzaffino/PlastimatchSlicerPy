@@ -32,6 +32,4 @@ reg.set_par("grad_tol", "1.5")
 reg.set_par("res", "4 4 2")
 reg.set_par("grid_spac", "80 80 80")
 
-reg.run_plm()
-
-reg.get_output_img("OUTPUT_IMG")
+reg.run_registration("OUTPUT_IMG")
