@@ -8,6 +8,8 @@ img_moving = "IMG2"
 
 reg.set_input_images(getNode(img_fixed).GetID(), getNode(img_moving).GetID())
 
+reg.set_input_landmarks("fixed_landmarks.fcsv", "moving_landmarks.fcsv")
+
 reg.add_stage()
 reg.set_par("xform", "align_center")
 
