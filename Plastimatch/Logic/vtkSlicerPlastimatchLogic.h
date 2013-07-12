@@ -48,20 +48,25 @@ public:
   static vtkSlicerPlastimatchLogic *New();
   vtkTypeMacro(vtkSlicerPlastimatchLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
-  void set_input_images(char* fixed_id, char* moving_id);
-  void set_input_landmarks(char* fixed_landmark_fn, char* moving_landmark_fn);
+  void set_input_images(char* FixedId, char* MovingId);
+  void set_input_landmarks(char* FixedLandmarkFn, char* MovingLandmarkFn);
   void add_stage();
   void set_par(char* key, char* val);
-  void run_registration(char* output_image_name);
-  void apply_warp(Plm_image *im_warped,   /* Output: Output image */
-    Xform * xf_in,          /* Input:  Input image warped by this xform */
-    Plm_image * fixed_img,   /* Input:  Size of output image */
-    Plm_image * im_in,       /* Input:  Input image */
-    float default_val,     /* Input:  Value for pixels without match */
-    int use_itk,           /* Input:  Force use of itk (1) or not (0) */
-    int interp_lin );
-  void get_output_img(char* output_image_name);
-
+  void run_registration(char* OutputImageName);
+  void apply_warp(Plm_image *WarpedImg,   /* Output: Output image */
+    Xform * XfIn,          /* Input:  Input image warped by this xform */
+    Plm_image * FixedImg,   /* Input:  Size of output image */
+    Plm_image * InImg,       /* Input:  Input image */
+    float DefaultVal,     /* Input:  Value for pixels without match */
+    int UseItk,           /* Input:  Force use of itk (1) or not (0) */
+    int InterpLin );
+  void get_output_img(char* OutputImageName);
+  
+  vtkSetStringMacro(FixedId);
+  vtkGetStringMacro(FixedId);
+  vtkSetStringMacro(MovingId);
+  vtkGetStringMacro(MovingId);
+  
 protected:
   vtkSlicerPlastimatchLogic();
   virtual ~vtkSlicerPlastimatchLogic();
@@ -80,12 +85,12 @@ private:
 public:
   Registration_parms *regp;
   Registration_data *regd;
-  Xform* xf_out;
-  char* fixed_id;
-  char* moving_id;
-  Plm_image * warped_img;
-  Labeled_pointset* fixed_landmarks;
-  Labeled_pointset* moving_landmarks;
+  Xform* XfOut;
+  char* FixedId;
+  char* MovingId;
+  Plm_image * WarpedImg;
+  Labeled_pointset* FixedLandmarks;
+  Labeled_pointset* MovingLandmarks;
 };
 
 #endif

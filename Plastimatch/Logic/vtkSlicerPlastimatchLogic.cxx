@@ -48,12 +48,12 @@ vtkSlicerPlastimatchLogic::vtkSlicerPlastimatchLogic()
 {
 regp = new Registration_parms();
 regd = new Registration_data();
-xf_out = 0;
-fixed_id = new char [256];
-moving_id = new char [256];
-warped_img = new Plm_image();
-fixed_landmarks = 0;
-moving_landmarks = 0;
+XfOut = 0;
+FixedId = new char [256];
+MovingId = new char [256];
+WarpedImg = new Plm_image();
+FixedLandmarks = 0;
+MovingLandmarks = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -61,12 +61,12 @@ vtkSlicerPlastimatchLogic::~vtkSlicerPlastimatchLogic()
 {
 delete regp;
 delete regd;
-if (xf_out) delete xf_out;
-delete &fixed_id;
-delete &moving_id;
-delete warped_img;
-if (fixed_landmarks) delete fixed_landmarks;
-if (moving_landmarks) delete moving_landmarks;
+if (XfOut) delete XfOut;
+delete &FixedId;
+delete &MovingId;
+delete WarpedImg;
+if (FixedLandmarks) delete FixedLandmarks;
+if (MovingLandmarks) delete MovingLandmarks;
 }
 
 //----------------------------------------------------------------------------
@@ -111,35 +111,35 @@ void vtkSlicerPlastimatchLogic
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::set_input_images(char* fixed_id, char* moving_id)
+::set_input_images(char* FixedId, char* MovingId)
 {
-  strcpy(this->fixed_id, fixed_id);
-  vtkMRMLVolumeNode* fixed_vtk_img = vtkMRMLVolumeNode::SafeDownCast(
-    this->GetMRMLScene()->GetNodeByID(this->fixed_id));
-  itk::Image<float, 3>::Pointer fixed_itk_img = itk::Image<float, 3>::New();
-  SlicerRtCommon::ConvertVolumeNodeToItkImage<float>(fixed_vtk_img, fixed_itk_img);
+  strcpy(this->FixedId, FixedId);
+  vtkMRMLVolumeNode* FixedVtkImg = vtkMRMLVolumeNode::SafeDownCast(
+    this->GetMRMLScene()->GetNodeByID(this->FixedId));
+  itk::Image<float, 3>::Pointer FixedItkImg = itk::Image<float, 3>::New();
+  SlicerRtCommon::ConvertVolumeNodeToItkImage<float>(FixedVtkImg, FixedItkImg);
   
-  strcpy(this->moving_id, moving_id);
-  vtkMRMLVolumeNode* moving_vtk_img = vtkMRMLVolumeNode::SafeDownCast(
-    this->GetMRMLScene()->GetNodeByID(this->moving_id));
-  itk::Image<float, 3>::Pointer moving_itk_img = itk::Image<float, 3>::New();
-  SlicerRtCommon::ConvertVolumeNodeToItkImage<float>(moving_vtk_img, moving_itk_img);
+  strcpy(this->MovingId, MovingId);
+  vtkMRMLVolumeNode* MovingVtkImg = vtkMRMLVolumeNode::SafeDownCast(
+    this->GetMRMLScene()->GetNodeByID(this->MovingId));
+  itk::Image<float, 3>::Pointer MovingItkImg = itk::Image<float, 3>::New();
+  SlicerRtCommon::ConvertVolumeNodeToItkImage<float>(MovingVtkImg, MovingItkImg);
   
-  this->regd->fixed_image = new Plm_image (fixed_itk_img);
-  this->regd->moving_image = new Plm_image (moving_itk_img);
+  this->regd->fixed_image = new Plm_image (FixedItkImg);
+  this->regd->moving_image = new Plm_image (MovingItkImg);
 }
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::set_input_landmarks(char* fixed_landmark_fn, char* moving_landmark_fn)
+::set_input_landmarks(char* FixedLandmarkFn, char* MovingLandmarkFn)
 {
-  fixed_landmarks = new Labeled_pointset();
-  fixed_landmarks->load(fixed_landmark_fn);
-  regd->fixed_landmarks = this->fixed_landmarks;  
+  FixedLandmarks = new Labeled_pointset();
+  FixedLandmarks->load(FixedLandmarkFn);
+  regd->fixed_landmarks = this->FixedLandmarks;  
   
-  moving_landmarks = new Labeled_pointset();
-  moving_landmarks->load(moving_landmark_fn);
-  regd->moving_landmarks = this->moving_landmarks;
+  MovingLandmarks = new Labeled_pointset();
+  MovingLandmarks->load(MovingLandmarkFn);
+  regd->moving_landmarks = this->MovingLandmarks;
 }
 
 //---------------------------------------------------------------------------
@@ -158,69 +158,69 @@ void vtkSlicerPlastimatchLogic
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::run_registration (char* output_image_name)
+::run_registration (char* OutputImageName)
 {
-  do_registration_pure (&this->xf_out, this->regd ,this->regp);
-  apply_warp(this->warped_img, this->xf_out, this->regd->fixed_image, this->regd->moving_image,
+  do_registration_pure (&this->XfOut, this->regd ,this->regp);
+  apply_warp(this->WarpedImg, this->XfOut, this->regd->fixed_image, this->regd->moving_image,
     -1200, 0, 1);
-  get_output_img(output_image_name);
+  get_output_img(OutputImageName);
 }
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::apply_warp(Plm_image *im_warped, Xform * xf_in, Plm_image * fixed_img, Plm_image * im_in,
-    float default_val, int use_itk, int interp_lin )
+::apply_warp(Plm_image* WarpedImg, Xform* XfIn, Plm_image* FixedImg, Plm_image* InImg,
+    float DefaultVal, int UseItk, int InterpLin )
 {
-  Plm_image_header * pih = new Plm_image_header(fixed_img);
-  plm_warp(im_warped, 0, xf_in, pih, im_in, default_val, use_itk, interp_lin);
+  Plm_image_header* pih = new Plm_image_header(FixedImg);
+  plm_warp(WarpedImg, 0, XfIn, pih, InImg, DefaultVal, UseItk, InterpLin);
 }
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::get_output_img (char* output_image_name)
+::get_output_img (char* OutputImageName)
 {
-  itk::Image<float, 3>::Pointer output_img_itk = this->warped_img->itk_float();    
+  itk::Image<float, 3>::Pointer OutputImgItk = this->WarpedImg->itk_float();    
   
-  vtkSmartPointer<vtkImageData> output_img_vtk = vtkSmartPointer<vtkImageData>::New();
-  itk::Image<float, 3>::RegionType region = output_img_itk->GetBufferedRegion();
+  vtkSmartPointer<vtkImageData> OutputImgVtk = vtkSmartPointer<vtkImageData>::New();
+  itk::Image<float, 3>::RegionType region = OutputImgItk->GetBufferedRegion();
   itk::Image<float, 3>::SizeType imageSize = region.GetSize();
   int extent[6]={0, (int) imageSize[0]-1, 0, (int) imageSize[1]-1, 0, (int) imageSize[2]-1};
-  output_img_vtk->SetExtent(extent);
-  output_img_vtk->SetScalarType(VTK_FLOAT);
-  output_img_vtk->SetNumberOfScalarComponents(1);
-  output_img_vtk->AllocateScalars();
+  OutputImgVtk->SetExtent(extent);
+  OutputImgVtk->SetScalarType(VTK_FLOAT);
+  OutputImgVtk->SetNumberOfScalarComponents(1);
+  OutputImgVtk->AllocateScalars();
   
-  float* output_img_Ptr = (float*)output_img_vtk->GetScalarPointer();
-  itk::ImageRegionIteratorWithIndex< itk::Image<float, 3> > it_output_img_itk(
-  output_img_itk, output_img_itk->GetLargestPossibleRegion() );
+  float* OutputImgPtr = (float*)OutputImgVtk->GetScalarPointer();
+  itk::ImageRegionIteratorWithIndex< itk::Image<float, 3> > ItOutputImgItk(
+  OutputImgItk, OutputImgItk->GetLargestPossibleRegion() );
   
-  for ( it_output_img_itk.GoToBegin(); !it_output_img_itk.IsAtEnd(); ++it_output_img_itk)
+  for ( ItOutputImgItk.GoToBegin(); !ItOutputImgItk.IsAtEnd(); ++ItOutputImgItk)
   {
-    itk::Image<float, 3>::IndexType i = it_output_img_itk.GetIndex();
-    (*output_img_Ptr) = output_img_itk->GetPixel(i);
-    output_img_Ptr++;
+    itk::Image<float, 3>::IndexType i = ItOutputImgItk.GetIndex();
+    (*OutputImgPtr) = OutputImgItk->GetPixel(i);
+    OutputImgPtr++;
   }
   
   // Read fixed image to get the geometrical information
-  vtkMRMLVolumeNode* fixed_vtk_img = vtkMRMLVolumeNode::SafeDownCast(
-  this->GetMRMLScene()->GetNodeByID(this->fixed_id));
+  vtkMRMLVolumeNode* FixedVtkImg = vtkMRMLVolumeNode::SafeDownCast(
+  this->GetMRMLScene()->GetNodeByID(this->FixedId));
   
   // Create new image node
-  vtkSmartPointer<vtkMRMLScalarVolumeNode> warped_img_node = vtkSmartPointer<vtkMRMLScalarVolumeNode>::New();
-  warped_img_node->SetAndObserveImageData (output_img_vtk);
-  warped_img_node->SetSpacing (
-    output_img_itk->GetSpacing()[0],
-    output_img_itk->GetSpacing()[1],
-    output_img_itk->GetSpacing()[2]);
-  warped_img_node->SetOrigin (
-    output_img_itk->GetOrigin()[0],
-    output_img_itk->GetOrigin()[1],
-    output_img_itk->GetOrigin()[2]);
-  std::string warped_img_name = this->GetMRMLScene()->GenerateUniqueName(output_image_name);
-  warped_img_node->SetName(warped_img_name.c_str());
+  vtkSmartPointer<vtkMRMLScalarVolumeNode> WarpedImgNode = vtkSmartPointer<vtkMRMLScalarVolumeNode>::New();
+  WarpedImgNode->SetAndObserveImageData (OutputImgVtk);
+  WarpedImgNode->SetSpacing (
+    OutputImgItk->GetSpacing()[0],
+    OutputImgItk->GetSpacing()[1],
+    OutputImgItk->GetSpacing()[2]);
+  WarpedImgNode->SetOrigin (
+    OutputImgItk->GetOrigin()[0],
+    OutputImgItk->GetOrigin()[1],
+    OutputImgItk->GetOrigin()[2]);
+  std::string WarpedImgName = this->GetMRMLScene()->GenerateUniqueName(OutputImageName);
+  WarpedImgNode->SetName(WarpedImgName.c_str());
   
-  warped_img_node->SetScene(this->GetMRMLScene());
-  warped_img_node->CopyOrientation(fixed_vtk_img);
-  this->GetMRMLScene()->AddNode(warped_img_node);
+  WarpedImgNode->SetScene(this->GetMRMLScene());
+  WarpedImgNode->CopyOrientation(FixedVtkImg);
+  this->GetMRMLScene()->AddNode(WarpedImgNode);
 }
 
