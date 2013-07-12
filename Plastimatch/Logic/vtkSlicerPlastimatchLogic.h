@@ -44,29 +44,27 @@ class VTK_SLICER_PLASTIMATCH_MODULE_LOGIC_EXPORT vtkSlicerPlastimatchLogic :
   public vtkSlicerModuleLogic
 {
 public:
-
   static vtkSlicerPlastimatchLogic *New();
   vtkTypeMacro(vtkSlicerPlastimatchLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
-  void set_input_images(char* FixedId, char* MovingId);
-  void set_input_landmarks(char* FixedLandmarkFn, char* MovingLandmarkFn);
-  void add_stage();
-  void set_par(char* key, char* val);
-  void run_registration(char* OutputImageName);
-  void apply_warp(Plm_image *WarpedImg,   /* Output: Output image */
-    Xform * XfIn,          /* Input:  Input image warped by this xform */
-    Plm_image * FixedImg,   /* Input:  Size of output image */
-    Plm_image * InImg,       /* Input:  Input image */
-    float DefaultVal,     /* Input:  Value for pixels without match */
-    int UseItk,           /* Input:  Force use of itk (1) or not (0) */
-    int InterpLin );
-  void get_output_img(char* OutputImageName);
-  
+  void AddStage();
+  void SetPar(char* key, char* val);
+  void RunRegistration();
+
+public:
   vtkSetStringMacro(FixedId);
   vtkGetStringMacro(FixedId);
   vtkSetStringMacro(MovingId);
   vtkGetStringMacro(MovingId);
-  
+
+  vtkSetStringMacro(FixedLandmarksFn);
+  vtkGetStringMacro(FixedLandmarksFn);
+  vtkSetStringMacro(MovingLandmarksFn);
+  vtkGetStringMacro(MovingLandmarksFn);
+
+  vtkSetStringMacro(OutputImageName);
+  vtkGetStringMacro(OutputImageName);
+ 
 protected:
   vtkSlicerPlastimatchLogic();
   virtual ~vtkSlicerPlastimatchLogic();
@@ -77,20 +75,31 @@ protected:
   virtual void UpdateFromMRMLScene();
   virtual void OnMRMLSceneNodeAdded(vtkMRMLNode* node);
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
-private:
 
+private:
   vtkSlicerPlastimatchLogic(const vtkSlicerPlastimatchLogic&); // Not implemented
   void operator=(const vtkSlicerPlastimatchLogic&);               // Not implemented
+  void ApplyWarp(Plm_image *WarpedImg,   /* Output: Output image */
+    Xform * XfIn,          /* Input:  Input image warped by this xform */
+    Plm_image * FixedImg,   /* Input:  Size of output image */
+    Plm_image * InImg,       /* Input:  Input image */
+    float DefaultVal,     /* Input:  Value for pixels without match */
+    int UseItk,           /* Input:  Force use of itk (1) or not (0) */
+    int InterpLin);
+  void GetOutputImg(char* PublicOutputImageName);
 
-public:
+private:
   Registration_parms *regp;
   Registration_data *regd;
   Xform* XfOut;
   char* FixedId;
   char* MovingId;
   Plm_image * WarpedImg;
+  char* FixedLandmarksFn;
   Labeled_pointset* FixedLandmarks;
+  char* MovingLandmarksFn;
   Labeled_pointset* MovingLandmarks;
+  char* OutputImageName;
 };
 
 #endif
