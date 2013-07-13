@@ -46,12 +46,12 @@ vtkStandardNewMacro(vtkSlicerPlastimatchLogic);
 //----------------------------------------------------------------------------
 vtkSlicerPlastimatchLogic::vtkSlicerPlastimatchLogic()
 {
-  this->regp = new Registration_parms();
-  this->regd = new Registration_data();
-  this->XfOut = NULL;
+  this->regp=new Registration_parms();
+  this->regd=new Registration_data();
+  this->XfOut=NULL;
   this->FixedId=NULL;
   this->MovingId=NULL;
-  this->WarpedImg = new Plm_image();
+  this->WarpedImg=new Plm_image();
   this->FixedLandmarksFn=NULL;
   this->FixedLandmarks=NULL;
   this->MovingLandmarksFn=NULL;
@@ -168,12 +168,11 @@ void vtkSlicerPlastimatchLogic
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::ApplyWarp(Plm_image* WarpedImg, Xform* XfIn, Plm_image* FixedImg, Plm_image* InImg,
-
+::ApplyWarp(Plm_image* WarpedImg, Xform* XfIn, Plm_image* FixedImg, Plm_image* InputImg,
     float DefaultVal, int UseItk, int InterpLin )
 {
   Plm_image_header* pih = new Plm_image_header(FixedImg);
-  plm_warp(WarpedImg, 0, XfIn, pih, InImg, DefaultVal, UseItk, InterpLin);
+  plm_warp(WarpedImg, 0, XfIn, pih, InputImg, DefaultVal, UseItk, InterpLin);
 }
 
 //---------------------------------------------------------------------------
