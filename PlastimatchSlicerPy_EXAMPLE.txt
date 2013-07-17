@@ -3,28 +3,17 @@ reg = vtkSlicerPlastimatchModuleLogicPython.vtkSlicerPlastimatchLogic()
 
 reg.SetMRMLScene(slicer.mrmlScene)
 
-img_fixed = "IMG1" 
-img_moving = "IMG2"
+img_fixed = "Img1" 
+img_moving = "Img2"
+xf_in = "LinearTransformation"
 
 reg.SetFixedId(getNode(img_fixed).GetID())
 reg.SetMovingId(getNode(img_moving).GetID())
-reg.SetOutputImageName("OUTPUT_IMG")
+reg.SetInputXfId(getNode(xf_in).GetID())
+reg.SetOutputImageName("OutputImg")
 
 reg.SetFixedLandmarksFn("fixed_landmarks.fcsv")
 reg.SetMovingLandmarksFn("moving_landmarks.fcsv")
-
-reg.AddStage()
-reg.SetPar("xform", "align_center")
-
-reg.AddStage()
-reg.SetPar("xform", "rigid")
-reg.SetPar("optim", "versor")
-reg.SetPar("impl", "itk")
-reg.SetPar("metric", "mse")
-reg.SetPar("max_its", "100")
-reg.SetPar("convergence_tol", "5")
-reg.SetPar("grad_tol", "1.5")
-reg.SetPar("res", "1 1 1")
 
 reg.AddStage()
 reg.SetPar("xform", "bspline")

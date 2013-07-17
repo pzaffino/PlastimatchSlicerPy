@@ -1,7 +1,8 @@
-This Slicer module allows to use Plastimatch (www.plastimatch.org) as a Python module from the embedded shell in Slicer (www.slicer.org).
-This folder has to be copied into the root directory of source code of the SlicerRT module (www.slicerrt.org).
-In order to enable the build of this module is needed edit the main CMakeList.txt file of the SlicerRT project.
-In particular in the section where are listed all the subdirectories to be included (more or less around the row #71) has to be added this line:
-add_subdirectory(Plastimatch)
+This 3D Slicer (www.slicer.org) module allows to use Plastimatch (www.plastimatch.org) as a Python module from the embedded shell in 3D Slicer.
+This module is part of SlicerRt plugin (www.slicerrt.org).
+
+This repository contains just my personal version of the code used for developing purpose.
+For this reason it can be unstable and/or can present bugs.
+For a stable release please use official SlicerRT code.
 
 For further information please email to: p dot zaffino at unicz dot it

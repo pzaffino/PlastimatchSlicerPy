@@ -62,6 +62,9 @@ public:
   vtkSetStringMacro(MovingLandmarksFn);
   vtkGetStringMacro(MovingLandmarksFn);
 
+  vtkSetStringMacro(InputXfId);
+  vtkGetStringMacro(InputXfId);
+
   vtkSetStringMacro(OutputImageName);
   vtkGetStringMacro(OutputImageName);
  
@@ -89,16 +92,18 @@ private:
   void GetOutputImg(char* PublicOutputImageName);
 
 private:
-  Registration_parms *regp;
-  Registration_data *regd;
-  Xform* XfOut;
   char* FixedId;
   char* MovingId;
-  Plm_image * WarpedImg;
   char* FixedLandmarksFn;
   Labeled_pointset* FixedLandmarks;
   char* MovingLandmarksFn;
   Labeled_pointset* MovingLandmarks;
+  Registration_parms *regp;
+  Registration_data *regd;
+  char* InputXfId;
+  Xform* XfIn;
+  Xform* XfOut;
+  Plm_image * WarpedImg;
   char* OutputImageName;
 };
 
