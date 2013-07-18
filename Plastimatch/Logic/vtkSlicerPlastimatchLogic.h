@@ -82,8 +82,12 @@ protected:
 
 private:
   vtkSlicerPlastimatchLogic(const vtkSlicerPlastimatchLogic&); // Not implemented
-  void operator=(const vtkSlicerPlastimatchLogic&);               // Not implemented
-  void ApplyWarp(Plm_image *WarpedImg,   /* Output: Output image */
+  void operator=(const vtkSlicerPlastimatchLogic&);              // Not implemented
+  void SetLandmarksFromSlicer();
+  void SetLandmarksFromFiles();
+  void ApplyInitialLinearTransformation();
+  void ApplyWarp(
+    Plm_image *WarpedImg,   /* Output: Output image */
     Xform * XfIn,          /* Input:  Input image warped by this xform */
     Plm_image * FixedImg,   /* Input:  Size of output image */
     Plm_image * InputImg,       /* Input:  Input image */
