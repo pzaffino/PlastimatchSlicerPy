@@ -1,20 +1,29 @@
 import vtkSlicerPlastimatchModuleLogicPython
 reg = vtkSlicerPlastimatchModuleLogicPython.vtkSlicerPlastimatchLogic()
 
+# Set scene
 reg.SetMRMLScene(slicer.mrmlScene)
 
+# Set input objects name
 img_fixed = "Img1" 
 img_moving = "Img2"
 xf_in = "LinearTransformation"
 
+# Set input/output images (required) and input transformation (not required)
 reg.SetFixedId(getNode(img_fixed).GetID())
 reg.SetMovingId(getNode(img_moving).GetID())
 reg.SetInputXfId(getNode(xf_in).GetID())
 reg.SetOutputImageName("OutputImg")
 
-reg.SetFixedLandmarksFn("fixed_landmarks.fcsv")
-reg.SetMovingLandmarksFn("moving_landmarks.fcsv")
+# Set landmarks from Slicer (not required)
+reg.AddLandmark(getNode("F").GetID(), "fixed")
+reg.AddLandmark(getNode("F_1").GetID(), "moving")
 
+# Set landmarks from files (not required)
+#reg.SetFixedLandmarksFn("fixed_landmarks.fcsv")
+#reg.SetMovingLandmarksFn("moving_landmarks.fcsv")
+
+# Add stage and set its parameters
 reg.AddStage()
 reg.SetPar("xform", "bspline")
 reg.SetPar("optim", "lbfgsb")
@@ -26,4 +35,5 @@ reg.SetPar("grad_tol", "1.5")
 reg.SetPar("res", "4 4 2")
 reg.SetPar("grid_spac", "80 80 80")
 
+# Run registration
 reg.RunRegistration()

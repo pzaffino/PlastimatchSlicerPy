@@ -21,6 +21,7 @@
 #include "vtkSlicerPlastimatchLogic.h"
 
 // MRML includes
+#include <vtkMRMLAnnotationFiducialNode.h>
 #include <vtkMRMLScalarVolumeNode.h>
 #include <vtkMRMLLinearTransformNode.h>
 
@@ -42,6 +43,7 @@
 #include "plm_image_header.h"
 #include "plm_warp.h"
 #include "plmregister.h"
+#include "pointset.h"
 #include "xform.h"
 
 //----------------------------------------------------------------------------
@@ -53,9 +55,7 @@ vtkSlicerPlastimatchLogic::vtkSlicerPlastimatchLogic()
   this->FixedId=NULL;
   this->MovingId=NULL;
   this->FixedLandmarksFn=NULL;
-  this->FixedLandmarks=NULL;
   this->MovingLandmarksFn=NULL;
-  this->MovingLandmarks=NULL;
   this->regp=new Registration_parms();
   this->regd=new Registration_data();
   this->InputXfId=NULL;
@@ -71,9 +71,7 @@ vtkSlicerPlastimatchLogic::~vtkSlicerPlastimatchLogic()
   this->SetFixedId(NULL);
   this->SetMovingId(NULL);
   this->SetFixedLandmarksFn(NULL);
-  this->FixedLandmarks=NULL;
   this->SetMovingLandmarksFn(NULL);
-  this->MovingLandmarks=NULL;
   this->regp=NULL;
   this->regd=NULL;
   this->SetInputXfId(NULL);
@@ -125,6 +123,41 @@ void vtkSlicerPlastimatchLogic
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
+:: AddLandmark(char* landmarkId, char* landmarkType)
+{
+  vtkMRMLAnnotationFiducialNode* slicerLandmark = vtkMRMLAnnotationFiducialNode::SafeDownCast(
+    this->GetMRMLScene()->GetNodeByID(landmarkId));
+  
+  double points[3] = {0.0};
+  slicerLandmark->GetFiducialCoordinates(points);
+  
+  Point3d landmark;
+  landmark.coord[0]=points[0];
+  landmark.coord[1]=points[1];
+  landmark.coord[2]=points[2];
+  
+  if (!strcmp(landmarkType, "fixed") ||
+      !strcmp(landmarkType, "FIXED") ||
+      !strcmp(landmarkType, "Fixed"))
+  {
+    this->FixedLandmarks.push_front(landmark);
+  }
+
+  else if (!strcmp(landmarkType, "moving") ||
+           !strcmp(landmarkType, "MOVING") ||
+           !strcmp(landmarkType, "Moving"))
+  {
+    this->MovingLandmarks.push_front(landmark);
+  }
+  else {
+    printf("Unknow landmark type!\n");
+  }
+
+}
+
+
+//---------------------------------------------------------------------------
+void vtkSlicerPlastimatchLogic
 :: AddStage()
 {
   this->regp->append_stage();
@@ -154,18 +187,53 @@ void vtkSlicerPlastimatchLogic
 
   this->regd->fixed_image = new Plm_image (FixedItkImg);
   this->regd->moving_image = new Plm_image (MovingItkImg);
-
-  // Set landmarks
-  if (GetFixedLandmarksFn() != NULL && GetFixedLandmarksFn() != NULL) {
-    FixedLandmarks = new Labeled_pointset();
-    FixedLandmarks->load(GetFixedLandmarksFn());
-    regd->fixed_landmarks = this->FixedLandmarks;
+  // Set landmarks from Slicer
+  if (!this->FixedLandmarks.empty() && !this->MovingLandmarks.empty() &&
+           this->FixedLandmarks.size() == this->MovingLandmarks.size()) {
     
-    MovingLandmarks = new Labeled_pointset();
-    MovingLandmarks->load(GetMovingLandmarksFn());
-    regd->moving_landmarks = this->MovingLandmarks;
-  }
+    Labeled_pointset* fixedLandmarksSet = new Labeled_pointset();
+    Labeled_pointset* movingLandmarksSet = new Labeled_pointset();
 
+    std::list<Point3d>::iterator fixedLandmarkIt;
+    std::list<Point3d>::iterator movingLandmarkIt;
+    // Set all the fixed landmarks
+    for (fixedLandmarkIt = this->FixedLandmarks.begin();
+         fixedLandmarkIt != this->FixedLandmarks.end(); fixedLandmarkIt++) {
+      
+      Labeled_point* fixedLandmark = new Labeled_point("point",
+                                       - fixedLandmarkIt->coord[0],
+                                       - fixedLandmarkIt->coord[1],
+                                       fixedLandmarkIt->coord[2]);
+      
+      fixedLandmarksSet->point_list.push_back(*fixedLandmark);
+    }
+    
+    // Set all the moving landmarks
+    for (movingLandmarkIt = this->MovingLandmarks.begin();
+         movingLandmarkIt != this->MovingLandmarks.end(); movingLandmarkIt++) {
+
+      Labeled_point* movingLandmark = new Labeled_point("point",
+                                       - movingLandmarkIt->coord[0],
+                                       - movingLandmarkIt->coord[1],
+                                       movingLandmarkIt->coord[2]);
+
+      movingLandmarksSet->point_list.push_back(*movingLandmark);
+    }
+  
+    regd->fixed_landmarks = fixedLandmarksSet;
+    regd->moving_landmarks = movingLandmarksSet; 
+  }
+  // Set landmarks from files
+  else if (GetFixedLandmarksFn() != NULL && GetFixedLandmarksFn() != NULL) {
+    Labeled_pointset* FixedLandmarksFromFile = new Labeled_pointset();
+    FixedLandmarksFromFile->load(GetFixedLandmarksFn());
+    regd->fixed_landmarks = FixedLandmarksFromFile;
+    
+    Labeled_pointset* MovingLandmarksFromFile = new Labeled_pointset();
+    MovingLandmarksFromFile->load(GetMovingLandmarksFn());
+    regd->moving_landmarks = MovingLandmarksFromFile;
+  }
+  
   // Set initial affine transformation
   if (GetInputXfId() != NULL) {
     

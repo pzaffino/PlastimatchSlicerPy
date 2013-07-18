@@ -48,6 +48,7 @@ public:
   vtkTypeMacro(vtkSlicerPlastimatchLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
   void AddStage();
+  void AddLandmark(char* landmarkId, char* landmarkType);
   void SetPar(char* key, char* val);
   void RunRegistration();
 
@@ -94,10 +95,11 @@ private:
 private:
   char* FixedId;
   char* MovingId;
+  struct Point3d { double coord[3]; }; 
+  std::list<Point3d> FixedLandmarks;
+  std::list<Point3d> MovingLandmarks;
   char* FixedLandmarksFn;
-  Labeled_pointset* FixedLandmarks;
   char* MovingLandmarksFn;
-  Labeled_pointset* MovingLandmarks;
   Registration_parms *regp;
   Registration_data *regd;
   char* InputXfId;

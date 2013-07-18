@@ -1,4 +1,4 @@
-This 3D Slicer (www.slicer.org) module allows to use Plastimatch (www.plastimatch.org) as a Python module from the embedded shell in 3D Slicer.
+This 3D Slicer module (www.slicer.org) allows to use Plastimatch (www.plastimatch.org) as a Python module from the embedded shell in 3D Slicer.
 This module is part of SlicerRt plugin (www.slicerrt.org).
 
 This repository contains just my personal version of the code used for developing purpose.
