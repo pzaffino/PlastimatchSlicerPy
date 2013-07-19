@@ -25,7 +25,7 @@
 #include <vtkMRMLScalarVolumeNode.h>
 #include <vtkMRMLLinearTransformNode.h>
 
-//STD includes
+// STD includes
 #include <string.h>
 
 // ITK includes
@@ -39,12 +39,15 @@
 #include <vtkMatrix4x4.h>
 
 // Plastimatch includes
+#include "bspline_interpolate.h"
 #include "plm_config.h"
 #include "plm_image_header.h"
 #include "plm_warp.h"
 #include "plmregister.h"
 #include "pointset.h"
 #include "xform.h"
+#include "raw_pointset.h"
+#include "volume.h"
 
 //----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkSlicerPlastimatchLogic);
@@ -56,6 +59,7 @@ vtkSlicerPlastimatchLogic::vtkSlicerPlastimatchLogic()
   this->MovingId=NULL;
   this->FixedLandmarksFn=NULL;
   this->MovingLandmarksFn=NULL;
+  this->LandmarksWarp=NULL;
   this->regp=new Registration_parms();
   this->regd=new Registration_data();
   this->InputXfId=NULL;
@@ -72,6 +76,7 @@ vtkSlicerPlastimatchLogic::~vtkSlicerPlastimatchLogic()
   this->SetMovingId(NULL);
   this->SetFixedLandmarksFn(NULL);
   this->SetMovingLandmarksFn(NULL);
+  this->LandmarksWarp=NULL;
   this->regp=NULL;
   this->regd=NULL;
   this->SetInputXfId(NULL);
@@ -155,7 +160,6 @@ void vtkSlicerPlastimatchLogic
 
 }
 
-
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
 :: AddStage()
@@ -209,8 +213,8 @@ void vtkSlicerPlastimatchLogic
   
   // Run registration and warp image
   do_registration_pure (&this->XfOut, this->regd ,this->regp);
-  ApplyWarp(this->WarpedImg, this->XfOut, this->regd->fixed_image, this->regd->moving_image,
-    -1200, 0, 1);
+  ApplyWarp(this->WarpedImg, NULL, this->XfOut, this->regd->fixed_image,
+            this->regd->moving_image, -1200, 0, 1);
   GetOutputImg(GetOutputImageName());
 }
 
@@ -251,7 +255,6 @@ void vtkSlicerPlastimatchLogic
     regd->fixed_landmarks = fixedLandmarksSet;
     regd->moving_landmarks = movingLandmarksSet;
 }
-
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
@@ -308,8 +311,8 @@ void vtkSlicerPlastimatchLogic
 
     // Warp image using the input transformation
     Plm_image* outputImageFromInputXf = new Plm_image;
-    ApplyWarp(outputImageFromInputXf, this->XfIn, this->regd->fixed_image, this->regd->moving_image,
-      -1200, 0, 1);
+    ApplyWarp(outputImageFromInputXf, NULL, this->XfIn, this->regd->fixed_image,
+              this->regd->moving_image, -1200, 0, 1);
 
     // Update moving image
     this->regd->moving_image=outputImageFromInputXf;
@@ -317,11 +320,11 @@ void vtkSlicerPlastimatchLogic
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::ApplyWarp(Plm_image* WarpedImg, Xform* XfIn, Plm_image* FixedImg, Plm_image* InputImg,
-    float DefaultVal, int UseItk, int InterpLin )
+::ApplyWarp(Plm_image* WarpedImg, DeformationFieldType::Pointer* VectorFieldOut, Xform* XfIn,
+            Plm_image* FixedImg, Plm_image* InputImg, float DefaultVal, int UseItk, int InterpLin )
 {
   Plm_image_header* pih = new Plm_image_header(FixedImg);
-  plm_warp(WarpedImg, 0, XfIn, pih, InputImg, DefaultVal, UseItk, InterpLin);
+  plm_warp(WarpedImg, VectorFieldOut, XfIn, pih, InputImg, DefaultVal, UseItk, InterpLin);
 }
 
 //---------------------------------------------------------------------------
@@ -371,5 +374,56 @@ void vtkSlicerPlastimatchLogic
   WarpedImgNode->SetScene(this->GetMRMLScene());
   WarpedImgNode->CopyOrientation(FixedVtkImg);
   this->GetMRMLScene()->AddNode(WarpedImgNode);
+}
+
+//---------------------------------------------------------------------------
+void vtkSlicerPlastimatchLogic
+::WarpLandmarks()
+{
+  Volume *vector_field;
+  vector_field = new Volume (this->regd->fixed_image->get_volume()->dim,
+                             this->regd->fixed_image->get_volume()->offset,
+                             this->regd->fixed_image->get_volume()->spacing,
+                             this->regd->fixed_image->get_volume()->direction_cosines,
+                             PT_VF_FLOAT_INTERLEAVED, 3);
+  bspline_interpolate_vf (vector_field, this->XfOut->get_gpuit_bsp() );
+
+  this->LandmarksWarp->m_fixed_landmarks  = pointset_create ();
+  this->LandmarksWarp->m_moving_landmarks = pointset_create ();
+  
+  for(std::vector<Labeled_point>::iterator it =
+      regd->fixed_landmarks->point_list.begin();
+      it != regd->fixed_landmarks->point_list.end();
+      ++it)
+  { 
+     float lm[3];
+     lm[0]=(*it).p[0];
+     lm[1]=(*it).p[1];
+     lm[2]=(*it).p[2];
+     pointset_add_point_noadjust( this->LandmarksWarp->m_fixed_landmarks, lm);
+  }
+  
+  for(std::vector<Labeled_point>::iterator it =
+      regd->moving_landmarks->point_list.begin();
+      it != regd->moving_landmarks->point_list.end();
+      ++it)
+  {
+    float lm[3];
+    lm[0]=(*it).p[0];
+    lm[1]=(*it).p[1];
+    lm[2]=(*it).p[2];
+    pointset_add_point_noadjust( this->LandmarksWarp->m_moving_landmarks, lm);
+  }
+  
+  Volume* moving_ss_clone = new Volume();
+  moving_ss_clone = this->regd->fixed_image->get_volume()->clone_raw();
+  Plm_image* moving_ss_plmimage = new Plm_image();
+  moving_ss_plmimage->set_volume (moving_ss_clone);
+  
+  this->LandmarksWarp->m_input_img = moving_ss_plmimage;
+  this->LandmarksWarp->m_pih.set_from_plm_image(this->LandmarksWarp->m_input_img);
+  
+  this->LandmarksWarp->m_warped_landmarks = pointset_create ();
+  calculate_warped_landmarks_by_vf(this->LandmarksWarp, vector_field);
 }
 

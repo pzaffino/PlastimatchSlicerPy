@@ -26,12 +26,17 @@
 // Slicer includes
 #include "vtkSlicerModuleLogic.h"
 
+// Plastimatch Module Logic
+#include "vtkSlicerPlastimatchModuleLogicExport.h"
+
 // STD includes
 #include <cstdlib>
 
-#include "vtkSlicerPlastimatchModuleLogicExport.h"
+// ITK includes
+#include "itkImage.h"
 
-// Plastimatch includes 
+// Plastimatch includes
+#include "landmark_warp.h"
 #include "plm_config.h"
 #include "plm_image.h"
 #include "plm_stages.h"
@@ -43,6 +48,9 @@
 class VTK_SLICER_PLASTIMATCH_MODULE_LOGIC_EXPORT vtkSlicerPlastimatchLogic :
   public vtkSlicerModuleLogic
 {
+  typedef itk::Vector< float, 3 >  VectorType;
+  typedef itk::Image< VectorType, 3 >  DeformationFieldType;
+
 public:
   static vtkSlicerPlastimatchLogic *New();
   vtkTypeMacro(vtkSlicerPlastimatchLogic, vtkSlicerModuleLogic);
@@ -88,6 +96,7 @@ private:
   void ApplyInitialLinearTransformation();
   void ApplyWarp(
     Plm_image *WarpedImg,   /* Output: Output image */
+    DeformationFieldType::Pointer* VectorFieldOut, /* Output: Output vf (optional) */
     Xform * XfIn,          /* Input:  Input image warped by this xform */
     Plm_image * FixedImg,   /* Input:  Size of output image */
     Plm_image * InputImg,       /* Input:  Input image */
@@ -95,6 +104,7 @@ private:
     int UseItk,           /* Input:  Force use of itk (1) or not (0) */
     int InterpLin);
   void GetOutputImg(char* PublicOutputImageName);
+  void WarpLandmarks();
 
 private:
   char* FixedId;
@@ -104,6 +114,7 @@ private:
   std::list<Point3d> MovingLandmarks;
   char* FixedLandmarksFn;
   char* MovingLandmarksFn;
+  Landmark_warp* LandmarksWarp;
   Registration_parms *regp;
   Registration_data *regd;
   char* InputXfId;
