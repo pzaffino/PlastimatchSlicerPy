@@ -146,6 +146,7 @@ void vtkSlicerPlastimatchLogic
       !strcmp(landmarkType, "Fixed"))
   {
     this->FixedLandmarks.push_front(landmark);
+    this->FixedLandmarksIds.push_front(landmarkId);
   }
 
   else if (!strcmp(landmarkType, "moving") ||
@@ -153,6 +154,7 @@ void vtkSlicerPlastimatchLogic
            !strcmp(landmarkType, "Moving"))
   {
     this->MovingLandmarks.push_front(landmark);
+    this->MovingLandmarksIds.push_front(landmarkId);
   }
   else {
     printf("Unknow landmark type!\n");
@@ -427,3 +429,41 @@ void vtkSlicerPlastimatchLogic
   calculate_warped_landmarks_by_vf(this->LandmarksWarp, vector_field);
 }
 
+//---------------------------------------------------------------------------
+void vtkSlicerPlastimatchLogic
+::UpdateMovingLandmarksToWarpedLandmarks()
+{
+  std::list<Point3d>::iterator movingLandmarkIt;
+  std::list<std::string>::iterator movingLandmarkIdsIt;
+  int i;
+  
+  // Update this->MovingLandmarks
+  for (movingLandmarkIt = this->MovingLandmarks.begin(), i=0;
+       movingLandmarkIt != this->MovingLandmarks.end(); movingLandmarkIt++, i++) {
+    movingLandmarkIt->coord[0] = this->LandmarksWarp->m_warped_landmarks->points[i*3+0];
+    movingLandmarkIt->coord[1] = this->LandmarksWarp->m_warped_landmarks->points[i*3+1];
+    movingLandmarkIt->coord[2] = this->LandmarksWarp->m_warped_landmarks->points[i*3+2];
+  }
+  
+  // Update this->regd->moving_landmarks
+  for (i=0; i < (int) this->regd->moving_landmarks->point_list.size(); i++) {
+    this->regd->moving_landmarks->point_list[i].p[0] =
+        this->LandmarksWarp->m_warped_landmarks->points[i*3+0];
+    this->regd->moving_landmarks->point_list[i].p[1] =
+        this->LandmarksWarp->m_warped_landmarks->points[i*3+1];
+    this->regd->moving_landmarks->point_list[i].p[2] =
+        this->LandmarksWarp->m_warped_landmarks->points[i*3+2];
+  }
+
+  // Update landmarks in Slicer
+  vtkMRMLAnnotationFiducialNode* slicerLandmark;
+  for (movingLandmarkIdsIt = this->MovingLandmarksIds.end(), i=0;
+       movingLandmarkIdsIt != this->MovingLandmarksIds.begin(); movingLandmarkIdsIt--, i++) {
+    slicerLandmark = vtkMRMLAnnotationFiducialNode::SafeDownCast(
+                       this->GetMRMLScene()->GetNodeByID(*movingLandmarkIdsIt));
+    slicerLandmark->SetFiducialCoordinates(this->LandmarksWarp->m_warped_landmarks->points[i*3+0],
+                                           this->LandmarksWarp->m_warped_landmarks->points[i*3+1],
+                                           this->LandmarksWarp->m_warped_landmarks->points[i*3+2]);
+  }
+
+}

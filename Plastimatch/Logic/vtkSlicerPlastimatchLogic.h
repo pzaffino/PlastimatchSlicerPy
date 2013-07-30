@@ -105,6 +105,7 @@ private:
     int InterpLin);
   void GetOutputImg(char* PublicOutputImageName);
   void WarpLandmarks();
+  void UpdateMovingLandmarksToWarpedLandmarks();
 
 private:
   char* FixedId;
@@ -112,6 +113,8 @@ private:
   struct Point3d { double coord[3]; }; 
   std::list<Point3d> FixedLandmarks;
   std::list<Point3d> MovingLandmarks;
+  std::list<std::string> FixedLandmarksIds;
+  std::list<std::string> MovingLandmarksIds;
   char* FixedLandmarksFn;
   char* MovingLandmarksFn;
   Landmark_warp* LandmarksWarp;
