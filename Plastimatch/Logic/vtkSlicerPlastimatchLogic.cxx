@@ -66,7 +66,7 @@ vtkSlicerPlastimatchLogic::vtkSlicerPlastimatchLogic()
   this->XfIn=NULL;
   this->XfOut=NULL;
   this->WarpedImg=new Plm_image();
-  this->OutputImageName=NULL;
+  this->OutputVolumeId=NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -83,7 +83,7 @@ vtkSlicerPlastimatchLogic::~vtkSlicerPlastimatchLogic()
   this->XfIn=NULL;
   this->XfOut=NULL;
   this->WarpedImg=NULL;
-  this->SetOutputImageName(NULL);
+  this->SetOutputVolumeId(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -217,7 +217,7 @@ void vtkSlicerPlastimatchLogic
   do_registration_pure (&this->XfOut, this->regd ,this->regp);
   ApplyWarp(this->WarpedImg, NULL, this->XfOut, this->regd->fixed_image,
             this->regd->moving_image, -1200, 0, 1);
-  GetOutputImg(GetOutputImageName());
+  GetOutputImg();
 }
 
 //---------------------------------------------------------------------------
@@ -331,7 +331,7 @@ void vtkSlicerPlastimatchLogic
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::GetOutputImg (char* PublicOutputImageName)
+::GetOutputImg ()
 {
   itk::Image<float, 3>::Pointer OutputImgItk = this->WarpedImg->itk_float();    
   
@@ -360,22 +360,12 @@ void vtkSlicerPlastimatchLogic
   this->GetMRMLScene()->GetNodeByID(GetFixedId()));
   
   // Create new image node
-  vtkSmartPointer<vtkMRMLScalarVolumeNode> WarpedImgNode = vtkSmartPointer<vtkMRMLScalarVolumeNode>::New();
-  WarpedImgNode->SetAndObserveImageData (OutputImgVtk);
-  WarpedImgNode->SetSpacing (
-    OutputImgItk->GetSpacing()[0],
-    OutputImgItk->GetSpacing()[1],
-    OutputImgItk->GetSpacing()[2]);
-  WarpedImgNode->SetOrigin (
-    OutputImgItk->GetOrigin()[0],
-    OutputImgItk->GetOrigin()[1],
-    OutputImgItk->GetOrigin()[2]);
-  std::string WarpedImgName = this->GetMRMLScene()->GenerateUniqueName(PublicOutputImageName);
-  WarpedImgNode->SetName(WarpedImgName.c_str());
+  vtkMRMLVolumeNode* WarpedImgNode = vtkMRMLVolumeNode::SafeDownCast(
+    this->GetMRMLScene()->GetNodeByID(GetOutputVolumeId()));
   
-  WarpedImgNode->SetScene(this->GetMRMLScene());
+  // Set warped image to a Slicer node
   WarpedImgNode->CopyOrientation(FixedVtkImg);
-  this->GetMRMLScene()->AddNode(WarpedImgNode);
+  WarpedImgNode->SetAndObserveImageData(OutputImgVtk);
 }
 
 //---------------------------------------------------------------------------

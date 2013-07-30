@@ -74,8 +74,8 @@ public:
   vtkSetStringMacro(InputXfId);
   vtkGetStringMacro(InputXfId);
 
-  vtkSetStringMacro(OutputImageName);
-  vtkGetStringMacro(OutputImageName);
+  vtkSetStringMacro(OutputVolumeId);
+  vtkGetStringMacro(OutputVolumeId);
  
 protected:
   vtkSlicerPlastimatchLogic();
@@ -103,7 +103,7 @@ private:
     float DefaultVal,     /* Input:  Value for pixels without match */
     int UseItk,           /* Input:  Force use of itk (1) or not (0) */
     int InterpLin);
-  void GetOutputImg(char* PublicOutputImageName);
+  void GetOutputImg();
   void WarpLandmarks();
   void UpdateMovingLandmarksToWarpedLandmarks();
 
@@ -124,7 +124,7 @@ private:
   Xform* XfIn;
   Xform* XfOut;
   Plm_image * WarpedImg;
-  char* OutputImageName;
+  char* OutputVolumeId;
 };
 
 #endif

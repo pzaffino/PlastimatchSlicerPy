@@ -13,7 +13,7 @@ xf_in = "LinearTransformation"
 reg.SetFixedId(getNode(img_fixed).GetID())
 reg.SetMovingId(getNode(img_moving).GetID())
 reg.SetInputXfId(getNode(xf_in).GetID())
-reg.SetOutputImageName("OutputImg")
+reg.SetOutputVolumeId(getNode(img_moving).GetID())
 
 # Set landmarks from Slicer (not required)
 reg.AddLandmark(getNode("F").GetID(), "fixed")
