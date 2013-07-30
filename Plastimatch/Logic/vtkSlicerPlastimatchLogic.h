@@ -35,6 +35,9 @@
 // ITK includes
 #include "itkImage.h"
 
+// VTK includes
+#include <vtkPoints.h>
+
 // Plastimatch includes
 #include "landmark_warp.h"
 #include "plm_config.h"
@@ -56,7 +59,6 @@ public:
   vtkTypeMacro(vtkSlicerPlastimatchLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
   void AddStage();
-  void AddLandmark(char* landmarkId, char* landmarkType);
   void SetPar(char* key, char* val);
   void RunRegistration();
 
@@ -66,6 +68,15 @@ public:
   vtkSetStringMacro(MovingId);
   vtkGetStringMacro(MovingId);
 
+  vtkSetMacro(FixedLandmarks, vtkPoints*);
+  vtkGetMacro(FixedLandmarks, vtkPoints*);
+
+  vtkSetMacro(MovingLandmarks, vtkPoints*);
+  vtkGetMacro(MovingLandmarks, vtkPoints*);
+  
+  vtkGetMacro(WarpedLandmarks, vtkPoints*);
+  vtkSetMacro(WarpedLandmarks, vtkPoints*);
+  
   vtkSetStringMacro(FixedLandmarksFn);
   vtkGetStringMacro(FixedLandmarksFn);
   vtkSetStringMacro(MovingLandmarksFn);
@@ -105,25 +116,21 @@ private:
     int InterpLin);
   void GetOutputImg();
   void WarpLandmarks();
-  void UpdateMovingLandmarksToWarpedLandmarks();
 
 private:
   char* FixedId;
   char* MovingId;
-  struct Point3d { double coord[3]; }; 
-  std::list<Point3d> FixedLandmarks;
-  std::list<Point3d> MovingLandmarks;
-  std::list<std::string> FixedLandmarksIds;
-  std::list<std::string> MovingLandmarksIds;
+  vtkPoints* FixedLandmarks;
+  vtkPoints* MovingLandmarks;
   char* FixedLandmarksFn;
   char* MovingLandmarksFn;
-  Landmark_warp* LandmarksWarp;
+  vtkPoints* WarpedLandmarks;
   Registration_parms *regp;
   Registration_data *regd;
   char* InputXfId;
   Xform* XfIn;
   Xform* XfOut;
-  Plm_image * WarpedImg;
+  Plm_image* WarpedImg;
   char* OutputVolumeId;
 };
 
