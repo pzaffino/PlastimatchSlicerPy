@@ -338,10 +338,10 @@ void vtkSlicerPlastimatchLogic
 ::WarpLandmarks()
 {
   Volume *vector_field;
-  vector_field = new Volume (this->regd->fixed_image->get_volume()->dim,
-                             this->regd->fixed_image->get_volume()->offset,
-                             this->regd->fixed_image->get_volume()->spacing,
-                             this->regd->fixed_image->get_volume()->direction_cosines,
+  vector_field = new Volume (this->regd->fixed_image->get_volume_float()->dim,
+                             this->regd->fixed_image->get_volume_float()->offset,
+                             this->regd->fixed_image->get_volume_float()->spacing,
+                             this->regd->fixed_image->get_volume_float()->direction_cosines,
                              PT_VF_FLOAT_INTERLEAVED, 3);
   bspline_interpolate_vf (vector_field, this->XfOut->get_gpuit_bsp() );
   
@@ -374,7 +374,7 @@ void vtkSlicerPlastimatchLogic
   }
   
   Volume* moving_ss_clone = new Volume();
-  moving_ss_clone = this->regd->fixed_image->get_volume()->clone_raw();
+  moving_ss_clone = this->regd->fixed_image->get_volume_float()->clone_raw();
   Plm_image* moving_ss_plmimage = new Plm_image();
   moving_ss_plmimage->set_volume (moving_ss_clone);
   
