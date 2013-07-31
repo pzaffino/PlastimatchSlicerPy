@@ -47,7 +47,7 @@
 #include "registration_data.h"
 #include "registration_parms.h"
 
-/// \ingroup Slicer_QtModules_ExtensionTemplate
+/// Class to wrap Plastimatch registration capability into the embedded Python shell in Slicer
 class VTK_SLICER_PLASTIMATCH_MODULE_LOGIC_EXPORT vtkSlicerPlastimatchLogic :
   public vtkSlicerModuleLogic
 {
@@ -55,36 +55,89 @@ class VTK_SLICER_PLASTIMATCH_MODULE_LOGIC_EXPORT vtkSlicerPlastimatchLogic :
   typedef itk::Image< VectorType, 3 >  DeformationFieldType;
 
 public:
-  static vtkSlicerPlastimatchLogic *New();
+  /// Create a new object
+  static vtkSlicerPlastimatchLogic* New();
+
+  //
   vtkTypeMacro(vtkSlicerPlastimatchLogic, vtkSlicerModuleLogic);
+  
+  //
   void PrintSelf(ostream& os, vtkIndent indent);
+  
+  /// Add a registration stage in the Plastimatch workflow
   void AddStage();
+
+  /// Set parameter in stage
   void SetPar(char* key, char* value);
+
+  /// Execute registration
   void RunRegistration();
 
 public:
+  // Description:
+  // Set/get the ID of the fixed image (image data type must be "float").
+  // This value is a required parameter to execute a registration.
   vtkSetStringMacro(FixedID);
   vtkGetStringMacro(FixedID);
+
+  // Description:
+  // Set/get the ID of the moving image (image data type must be "float").
+  // This value is a required parameter to execute a registration.
   vtkSetStringMacro(MovingID);
   vtkGetStringMacro(MovingID);
-
+  
+  // Description:
+  // Set/get the fixed landmarks using a vtkPoints object.
+  // The number of the fixed landmarks must be the same of the number of the moving landmarks.
+  // Landmarks passing as vtkPoints have the priority over landmarks passing by files.
+  // Is not possible mix landmarks from vtkPoints and from files.
+  // If no fcsv files are passing this value is a required parameter to execute a landmark based registration.
   vtkSetMacro(FixedLandmarks, vtkPoints*);
   vtkGetMacro(FixedLandmarks, vtkPoints*);
 
+  // Description:
+  // Set/get the moving landmarks using a vtkPoints object.
+  // The number of the moving landmarks must be the same of the number of fixed landmarks.
+  // Landmarks passing as vtkPoints have the priority over landmarks passing by files.
+  // Is not possible mix landmarks from vtkPoints and from files.
+  // If no fcsv files are passing this value is a required parameter to execute a landmark based registration.
   vtkSetMacro(MovingLandmarks, vtkPoints*);
   vtkGetMacro(MovingLandmarks, vtkPoints*);
-  
-  vtkGetMacro(WarpedLandmarks, vtkPoints*);
-  vtkSetMacro(WarpedLandmarks, vtkPoints*);
-  
+
+  // Description:
+  // Set/get the fcsv file name containing the fixed landmarks.
+  // The number of the fixed landmarks must be the same of the number of the moving landmarks.
+  // Landmarks passing as vtkPoints have the priority over landmarks passing by files.
+  // Is not possible mix landmarks from vtkPoints and from files.
+  // If no vtkPoints objects are passing this value is a required parameter to execute a landmark based registration.
   vtkSetStringMacro(FixedLandmarksFileName);
   vtkGetStringMacro(FixedLandmarksFileName);
+
+  // Description:
+  // Set/get the fcsv file name containing the moving landmarks.
+  // The number of the moving landmarks must be the same of the number of the fixed landmarks.
+  // Landmarks passing as vtkPoints have the priority over landmarks passing by files.
+  // Is not possible mix landmarks from vtkPoints and from files.
+  // If no vtkPoints objects are passing this value is a required parameter to execute a landmark based registration.
   vtkSetStringMacro(MovingLandmarksFileName);
   vtkGetStringMacro(MovingLandmarksFileName);
 
+  // Description:
+  // Set/Get the warped landmarks using a vtkPoints object.
+  // This value is a required parameter to execute a landmark based registration.
+  vtkGetMacro(WarpedLandmarks, vtkPoints*);
+  vtkSetMacro(WarpedLandmarks, vtkPoints*);
+  
+  // Description:
+  // Set/get the ID of a precomputed rigid/affine transformation.
+  // This transformation will be used as initialization for the Plastimatch registration.
+  // This value is an optional parameter to execute a registration.
   vtkSetStringMacro(InputTransformationID);
   vtkGetStringMacro(InputTransformationID);
 
+  // Description:
+  // Set/Get the ID of the output image.
+  // This value is a required parameter to execute a registration.
   vtkSetStringMacro(OutputVolumeID);
   vtkGetStringMacro(OutputVolumeID);
  
