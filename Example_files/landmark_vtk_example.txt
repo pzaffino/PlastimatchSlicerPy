@@ -17,11 +17,11 @@ mov_landmarks = vtk.vtkPoints()
 mov_landmarks.InsertPoint(0, 0.940000, 59.762867, 53.381721)
 
 # Set input/output images and input landmarks
-reg.SetFixedId(getNode(img_fixed).GetID())
-reg.SetMovingId(getNode(img_moving).GetID())
+reg.SetFixedID(getNode(img_fixed).GetID())
+reg.SetMovingID(getNode(img_moving).GetID())
 reg.SetFixedLandmarks(fix_landmarks)
 reg.SetMovingLandmarks(mov_landmarks)
-reg.SetOutputVolumeId(getNode(img_moving).GetID())
+reg.SetOutputVolumeID(getNode(img_moving).GetID())
 
 # Add stage and set the parameters
 reg.AddStage()

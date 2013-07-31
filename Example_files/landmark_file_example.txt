@@ -9,13 +9,13 @@ img_moving = "Img1"
 img_fixed = "Img2" 
 
 # Set input/output images
-reg.SetFixedId(getNode(img_fixed).GetID())
-reg.SetMovingId(getNode(img_moving).GetID())
-reg.SetOutputVolumeId(getNode(img_moving).GetID())
+reg.SetFixedID(getNode(img_fixed).GetID())
+reg.SetMovingID(getNode(img_moving).GetID())
+reg.SetOutputVolumeID(getNode(img_moving).GetID())
 
 # Set landmarks using files
-reg.SetFixedLandmarksFn("/home/user/test/fixed_landmarks.fcsv")
-reg.SetMovingLandmarksFn("/home/user/test/moving_landmarks.fcsv")
+reg.SetFixedLandmarksFileName("/home/user/test/fixed_landmarks.fcsv")
+reg.SetMovingLandmarksFileName("/home/user/test/moving_landmarks.fcsv")
 
 # Add stage and set the parameters
 reg.AddStage()

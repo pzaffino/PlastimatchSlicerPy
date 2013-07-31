@@ -63,10 +63,10 @@ public:
   void RunRegistration();
 
 public:
-  vtkSetStringMacro(FixedId);
-  vtkGetStringMacro(FixedId);
-  vtkSetStringMacro(MovingId);
-  vtkGetStringMacro(MovingId);
+  vtkSetStringMacro(FixedID);
+  vtkGetStringMacro(FixedID);
+  vtkSetStringMacro(MovingID);
+  vtkGetStringMacro(MovingID);
 
   vtkSetMacro(FixedLandmarks, vtkPoints*);
   vtkGetMacro(FixedLandmarks, vtkPoints*);
@@ -77,16 +77,16 @@ public:
   vtkGetMacro(WarpedLandmarks, vtkPoints*);
   vtkSetMacro(WarpedLandmarks, vtkPoints*);
   
-  vtkSetStringMacro(FixedLandmarksFn);
-  vtkGetStringMacro(FixedLandmarksFn);
-  vtkSetStringMacro(MovingLandmarksFn);
-  vtkGetStringMacro(MovingLandmarksFn);
+  vtkSetStringMacro(FixedLandmarksFileName);
+  vtkGetStringMacro(FixedLandmarksFileName);
+  vtkSetStringMacro(MovingLandmarksFileName);
+  vtkGetStringMacro(MovingLandmarksFileName);
 
-  vtkSetStringMacro(InputXfId);
-  vtkGetStringMacro(InputXfId);
+  vtkSetStringMacro(InputTransformationID);
+  vtkGetStringMacro(InputTransformationID);
 
-  vtkSetStringMacro(OutputVolumeId);
-  vtkGetStringMacro(OutputVolumeId);
+  vtkSetStringMacro(OutputVolumeID);
+  vtkGetStringMacro(OutputVolumeID);
  
 protected:
   vtkSlicerPlastimatchLogic();
@@ -106,32 +106,32 @@ private:
   void SetLandmarksFromFiles();
   void ApplyInitialLinearTransformation();
   void ApplyWarp(
-    Plm_image *WarpedImg,   /* Output: Output image */
-    DeformationFieldType::Pointer* VectorFieldOut, /* Output: Output vf (optional) */
-    Xform * XfIn,          /* Input:  Input image warped by this xform */
-    Plm_image * FixedImg,   /* Input:  Size of output image */
-    Plm_image * InputImg,       /* Input:  Input image */
-    float DefaultVal,     /* Input:  Value for pixels without match */
-    int UseItk,           /* Input:  Force use of itk (1) or not (0) */
-    int InterpLin);
-  void GetOutputImg();
+    Plm_image* warpedImage,   /* Output: Output image */
+    DeformationFieldType::Pointer* vectorFieldOut, /* Output: Output vf (optional) */
+    Xform* inputTransformation,          /* Input:  Input image warped by this xform */
+    Plm_image* fixedImage,   /* Input:  Size of output image */
+    Plm_image* inputImage,       /* Input:  Input image */
+    float defaultValue,     /* Input:  Value for pixels without match */
+    int useItk,           /* Input:  Force use of itk (1) or not (0) */
+    int interpolationLinear);
+  void GetOutputImage();
   void WarpLandmarks();
 
 private:
-  char* FixedId;
-  char* MovingId;
+  char* FixedID;
+  char* MovingID;
   vtkPoints* FixedLandmarks;
   vtkPoints* MovingLandmarks;
-  char* FixedLandmarksFn;
-  char* MovingLandmarksFn;
+  char* FixedLandmarksFileName;
+  char* MovingLandmarksFileName;
   vtkPoints* WarpedLandmarks;
-  Registration_parms *regp;
-  Registration_data *regd;
-  char* InputXfId;
-  Xform* XfIn;
-  Xform* XfOut;
-  Plm_image* WarpedImg;
-  char* OutputVolumeId;
+  Registration_parms* RegistrationParameters;
+  Registration_data* RegistrationData;
+  char* InputTransformationID;
+  Xform* InputTransformation;
+  Xform* OutputTransformation;
+  Plm_image* WarpedImage;
+  char* OutputVolumeID;
 };
 
 #endif

@@ -9,9 +9,9 @@ img_fixed = "Img1"
 img_moving = "Img2"
 
 # Set input/output images 
-reg.SetFixedId(getNode(img_fixed).GetID())
-reg.SetMovingId(getNode(img_moving).GetID())
-reg.SetOutputVolumeId(getNode(img_moving).GetID())
+reg.SetFixedID(getNode(img_fixed).GetID())
+reg.SetMovingID(getNode(img_moving).GetID())
+reg.SetOutputVolumeID(getNode(img_moving).GetID())
 
 # Add stages and set the parameters
 reg.AddStage()

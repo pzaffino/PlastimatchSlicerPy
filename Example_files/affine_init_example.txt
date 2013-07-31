@@ -10,10 +10,10 @@ img_moving = "Img2"
 xf_in = "AffineTransformation"
 
 # Set input/output images and input transformation 
-reg.SetFixedId(getNode(img_fixed).GetID())
-reg.SetMovingId(getNode(img_moving).GetID())
-reg.SetInputXfId(getNode(xf_in).GetID())
-reg.SetOutputVolumeId(getNode(img_moving).GetID())
+reg.SetFixedID(getNode(img_fixed).GetID())
+reg.SetMovingID(getNode(img_moving).GetID())
+reg.SetInputTransformationID(getNode(xf_in).GetID())
+reg.SetOutputVolumeID(getNode(img_moving).GetID())
 
 # Add stage and set the parameters
 reg.AddStage()
