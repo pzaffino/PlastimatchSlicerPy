@@ -59,7 +59,7 @@ public:
   vtkTypeMacro(vtkSlicerPlastimatchLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
   void AddStage();
-  void SetPar(char* key, char* val);
+  void SetPar(char* key, char* value);
   void RunRegistration();
 
 public:
