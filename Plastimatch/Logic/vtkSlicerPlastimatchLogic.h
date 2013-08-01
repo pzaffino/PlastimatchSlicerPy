@@ -153,37 +153,82 @@ protected:
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
 
 private:
+  //
   vtkSlicerPlastimatchLogic(const vtkSlicerPlastimatchLogic&); // Not implemented
+  
+  //
   void operator=(const vtkSlicerPlastimatchLogic&);              // Not implemented
+
+  /// This function sets the vtkPoints as input landmarks for Plastimatch registration
   void SetLandmarksFromSlicer();
+
+  /// This function reads the fcsv files containing the landmarks and sets them as input landmarks for Plastimatch registration
   void SetLandmarksFromFiles();
+
+  /// This function applies an initial affine trasformation modifing the moving image before the Plastimatch registration
   void ApplyInitialLinearTransformation();
+
+  /// This function applies a linear/deformable transformation at an image.
+  /// It is used from ApplyInitialLinearTransformation() and RunRegistration().
   void ApplyWarp(
-    Plm_image* warpedImage,   /* Output: Output image */
-    DeformationFieldType::Pointer* vectorFieldOut, /* Output: Output vf (optional) */
-    Xform* inputTransformation,          /* Input:  Input image warped by this xform */
-    Plm_image* fixedImage,   /* Input:  Size of output image */
-    Plm_image* inputImage,       /* Input:  Input image */
-    float defaultValue,     /* Input:  Value for pixels without match */
-    int useItk,           /* Input:  Force use of itk (1) or not (0) */
-    int interpolationLinear);
+    Plm_image* warpedImage,                        /*!< Output image as Plm_image pointer */
+    DeformationFieldType::Pointer* vectorFieldOut, /*!< Output vector field (optional) as DeformationFieldType::Pointer */
+    Xform* inputTransformation,                    /*!< Input transformation as Xform pointer */
+    Plm_image* fixedImage,                         /*!< Fixed image as Plm_image pointer */
+    Plm_image* inputImage,                         /*!< Input image to warp as Plm_image pointer */
+    float defaultValue,                            /*!< Value (float) for pixels without match */
+    int useItk,                                    /*!< Int to choose between itk (1) or Plastimatch (0) algorithm for the warp task */
+    int interpolationLinear                        /*!< Int to choose between trilinear interpolation (1) on nearest neighbor (0) */
+    );
+
+  /// This function shows the output image into the Slicer scene
   void GetOutputImage();
+
+  /// This function warps the landmarks according to OutputTransformation
   void WarpLandmarks();
 
 private:
+  
+  /// ID of the fixed image
   char* FixedID;
+
+  /// ID of the moving image
   char* MovingID;
+
+  /// vtkPoints object containing the fixed landmarks
   vtkPoints* FixedLandmarks;
+  
+  /// vtkPoints object containing the moving landmarks
   vtkPoints* MovingLandmarks;
+  
+  /// Name of the fcsv containing the fixed landmarks
   char* FixedLandmarksFileName;
+  
+  /// Name of the fcsv containing the moving landmarks
   char* MovingLandmarksFileName;
+  
+  /// vtkPoints object containing the warped landmarks
   vtkPoints* WarpedLandmarks;
+  
+  /// Plastimatch registration parameters
   Registration_parms* RegistrationParameters;
+
+  /// Plastimatch registration data
   Registration_data* RegistrationData;
+  
+  /// ID of the affine registration used as initialization for the Plastimatch registration
   char* InputTransformationID;
+
+  /// Initial affine transformation
   Xform* InputTransformation;
+
+  /// Transformation (linear or deformable) computed by Plastimatch
   Xform* OutputTransformation;
+
+  /// Image deformed by Plastimatch
   Plm_image* WarpedImage;
+  
+  /// ID of the registered image
   char* OutputVolumeID;
 };
 
