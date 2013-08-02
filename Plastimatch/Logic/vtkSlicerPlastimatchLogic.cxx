@@ -45,6 +45,7 @@
 #include "plm_warp.h"
 #include "plmregister.h"
 #include "pointset.h"
+#include "pointset_warp.h"
 #include "xform.h"
 #include "raw_pointset.h"
 #include "volume.h"
@@ -67,6 +68,7 @@ vtkSlicerPlastimatchLogic::vtkSlicerPlastimatchLogic()
   this->InputTransformationID=NULL;
   this->InputTransformation=NULL;
   this->OutputTransformation=NULL;
+  this->OutputVectorField=NULL;
   this->WarpedImage=NULL;
   this->OutputVolumeID=NULL;
 }
@@ -86,6 +88,7 @@ vtkSlicerPlastimatchLogic::~vtkSlicerPlastimatchLogic()
   this->SetInputTransformationID(NULL);
   this->InputTransformation=NULL;
   this->OutputTransformation=NULL;
+  this->OutputVectorField=NULL;
   this->WarpedImage=NULL;
   this->SetOutputVolumeID(NULL);
 }
@@ -186,8 +189,8 @@ void vtkSlicerPlastimatchLogic
   // Run registration and warp image
   do_registration_pure (&this->OutputTransformation, this->RegistrationData ,this->RegistrationParameters);
   this->WarpedImage=new Plm_image();
-  ApplyWarp(this->WarpedImage, NULL, this->OutputTransformation, this->RegistrationData->fixed_image,
-            this->RegistrationData->moving_image, -1200, 0, 1);
+  ApplyWarp(this->WarpedImage, this->OutputVectorField, this->OutputTransformation,
+    this->RegistrationData->fixed_image, this->RegistrationData->moving_image, -1200, 0, 1);
   GetOutputImage();
 
   // Warp landmarks
@@ -207,14 +210,14 @@ void vtkSlicerPlastimatchLogic
   for (int i = 0; i < this->FixedLandmarks->GetNumberOfPoints(); i++)
     {
     Labeled_point* fixedLandmark = new Labeled_point("point",
-      this->FixedLandmarks->GetPoint(i)[0],
+      - this->FixedLandmarks->GetPoint(i)[0],
       - this->FixedLandmarks->GetPoint(i)[1],
-      - this->FixedLandmarks->GetPoint(i)[2]);
+      this->FixedLandmarks->GetPoint(i)[2]);
 
     Labeled_point* movingLandmark = new Labeled_point("point",
-      this->MovingLandmarks->GetPoint(i)[0],
+      - this->MovingLandmarks->GetPoint(i)[0],
       - this->MovingLandmarks->GetPoint(i)[1],
-      - this->MovingLandmarks->GetPoint(i)[2]);
+      this->MovingLandmarks->GetPoint(i)[2]);
    
     fixedLandmarksSet->point_list.push_back(*fixedLandmark);
     movingLandmarksSet->point_list.push_back(*movingLandmark);
@@ -286,13 +289,15 @@ void vtkSlicerPlastimatchLogic
 
 //---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
-::ApplyWarp(Plm_image* warpedImage, DeformationFieldType::Pointer* vectorFieldOut,
+::ApplyWarp(Plm_image* warpedImage, DeformationFieldType::Pointer vectorFieldOut,
   Xform* inputTransformation, Plm_image* fixedImage, Plm_image* inputImage,
   float defaultValue, int useItk, int interpolationLinear)
 {
   Plm_image_header* pih = new Plm_image_header(fixedImage);
-  plm_warp(warpedImage, vectorFieldOut, inputTransformation, pih, inputImage, defaultValue,
+  DeformationFieldType::Pointer* vectorFieldPointer = &vectorFieldOut;
+  plm_warp(warpedImage, vectorFieldPointer, inputTransformation, pih, inputImage, defaultValue,
     useItk, interpolationLinear);
+  this->OutputVectorField = *vectorFieldPointer;
 }
 
 //---------------------------------------------------------------------------
@@ -338,6 +343,11 @@ void vtkSlicerPlastimatchLogic
 void vtkSlicerPlastimatchLogic
 ::WarpLandmarks()
 {
+  Labeled_pointset warped_pointset; //= new Labeled_pointset;
+  pointset_warp (&warped_pointset, this->RegistrationData->moving_landmarks, this->OutputVectorField);
+  
+  
+#if defined (commentout)
   Volume *vector_field;
   vector_field = new Volume (this->RegistrationData->fixed_image->get_volume_float()->dim,
     this->RegistrationData->fixed_image->get_volume_float()->offset,
@@ -406,5 +416,6 @@ void vtkSlicerPlastimatchLogic
       landmarksWarp->m_warped_landmarks->points[i*3+1],
       landmarksWarp->m_warped_landmarks->points[i*3+2]);
     }
+#endif
 }
 
