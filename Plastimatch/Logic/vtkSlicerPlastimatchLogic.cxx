@@ -294,10 +294,9 @@ void vtkSlicerPlastimatchLogic
   float defaultValue, int useItk, int interpolationLinear)
 {
   Plm_image_header* pih = new Plm_image_header(fixedImage);
-  DeformationFieldType::Pointer* vectorFieldPointer = &vectorFieldOut;
-  plm_warp(warpedImage, vectorFieldPointer, inputTransformation, pih, inputImage, defaultValue,
+  plm_warp(warpedImage, &vectorFieldOut, inputTransformation, pih, inputImage, defaultValue,
     useItk, interpolationLinear);
-  this->OutputVectorField = *vectorFieldPointer;
+  this->OutputVectorField = vectorFieldOut;
 }
 
 //---------------------------------------------------------------------------
@@ -343,79 +342,17 @@ void vtkSlicerPlastimatchLogic
 void vtkSlicerPlastimatchLogic
 ::WarpLandmarks()
 {
-  Labeled_pointset warped_pointset; //= new Labeled_pointset;
-  pointset_warp (&warped_pointset, this->RegistrationData->moving_landmarks, this->OutputVectorField);
-  
-  
-#if defined (commentout)
-  Volume *vector_field;
-  vector_field = new Volume (this->RegistrationData->fixed_image->get_volume_float()->dim,
-    this->RegistrationData->fixed_image->get_volume_float()->offset,
-    this->RegistrationData->fixed_image->get_volume_float()->spacing,
-    this->RegistrationData->fixed_image->get_volume_float()->direction_cosines,
-    PT_VF_FLOAT_INTERLEAVED, 3);
-  bspline_interpolate_vf (vector_field, this->OutputTransformation->get_gpuit_bsp() );
-  
-  Landmark_warp* landmarksWarp = new Landmark_warp();
-  landmarksWarp->m_fixed_landmarks  = pointset_create ();
-  landmarksWarp->m_moving_landmarks = pointset_create ();
-  
-  for(std::vector<Labeled_point>::iterator it =
-    this->RegistrationData->fixed_landmarks->point_list.begin();
-    it != this->RegistrationData->fixed_landmarks->point_list.end();
-    ++it)
-    { 
-    float lm[3];
-    lm[0]=(*it).p[0];
-    lm[1]=(*it).p[1];
-    lm[2]=(*it).p[2];
-    pointset_add_point_noadjust( landmarksWarp->m_fixed_landmarks, lm);
-    }
-  
-  for(std::vector<Labeled_point>::iterator it =
-    this->RegistrationData->moving_landmarks->point_list.begin();
-    it != this->RegistrationData->moving_landmarks->point_list.end();
-    ++it)
-    {
-    float lm[3];
-    lm[0]=(*it).p[0];
-    lm[1]=(*it).p[1];
-    lm[2]=(*it).p[2];
-    pointset_add_point_noadjust( landmarksWarp->m_moving_landmarks, lm);
-    }
-  
-  Volume* moving_ss_clone = new Volume();
-  moving_ss_clone = this->RegistrationData->fixed_image->get_volume_float()->clone_raw();
-  Plm_image* moving_ss_plmimage = new Plm_image();
-  moving_ss_plmimage->set_volume (moving_ss_clone);
-  
-  landmarksWarp->m_input_img = moving_ss_plmimage;
-  landmarksWarp->m_pih.set_from_plm_image(landmarksWarp->m_input_img);
-  
-  landmarksWarp->m_warped_landmarks = pointset_create ();
-  calculate_warped_landmarks_by_vf(landmarksWarp, vector_field);
-
-  // Update this->RegistrationData->moving_landmarks and WarpedLandmarks
-  assert ((int) this->RegistrationData->moving_landmarks->point_list.size() ==
-    this->MovingLandmarks->GetNumberOfPoints());
+  Labeled_pointset warpedPointset;
+  pointset_warp (&warpedPointset, this->RegistrationData->moving_landmarks, this->OutputVectorField);
   
   this->WarpedLandmarks = vtkPoints::New();
 
-  for (int i=0; i < (int) this->RegistrationData->moving_landmarks->point_list.size(); i++)
+  for (int i=0; i < (int) warpedPointset.count(); i++)
     {
-    // Update this->RegistrationData->moving_landmarks
-    this->RegistrationData->moving_landmarks->point_list[i].p[0] =
-      landmarksWarp->m_warped_landmarks->points[i*3+0];
-    this->RegistrationData->moving_landmarks->point_list[i].p[1] =
-      landmarksWarp->m_warped_landmarks->points[i*3+1];
-    this->RegistrationData->moving_landmarks->point_list[i].p[2] =
-      landmarksWarp->m_warped_landmarks->points[i*3+2];
-
-    // Update WarpedLandmarks
-    this->WarpedLandmarks->InsertPoint(i, landmarksWarp->m_warped_landmarks->points[i*3+0],
-      landmarksWarp->m_warped_landmarks->points[i*3+1],
-      landmarksWarp->m_warped_landmarks->points[i*3+2]);
+    this->WarpedLandmarks->InsertPoint(i,
+      - warpedPointset.point_list[i].p[0],
+      - warpedPointset.point_list[i].p[1],
+      warpedPointset.point_list[i].p[2]);
     }
-#endif
 }
 
