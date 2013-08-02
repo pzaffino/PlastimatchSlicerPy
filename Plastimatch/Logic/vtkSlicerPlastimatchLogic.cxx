@@ -148,6 +148,32 @@ void vtkSlicerPlastimatchLogic
 }
 
 //---------------------------------------------------------------------------
+template<class T> 
+static void 
+itk_rectify_volume_hack (T image)
+{
+  typename T::ObjectType::RegionType rg = image->GetLargestPossibleRegion ();
+  typename T::ObjectType::PointType og = image->GetOrigin();
+  typename T::ObjectType::SpacingType sp = image->GetSpacing();
+  typename T::ObjectType::SizeType sz = rg.GetSize();
+  typename T::ObjectType::DirectionType dc = image->GetDirection();
+
+  printf ("Pre-hack\nog= %g %g %g\nsp= %g %g %g\ndc= %g %g %g...\n", 
+          og[0], og[1], og[2],
+          sp[0], sp[1], sp[2],
+          dc[0][0], dc[0][1], dc[0][2]
+  );
+
+  og[0] = og[0] - (sz[0] - 1) * sp[0];
+  og[1] = og[1] - (sz[1] - 1) * sp[1];
+  dc[0][0] = 1.;
+  dc[1][1] = 1.;
+
+  image->SetOrigin(og);
+  image->SetDirection(dc);
+}
+
+//---------------------------------------------------------------------------
 void vtkSlicerPlastimatchLogic
 ::RunRegistration()
 {
@@ -155,12 +181,15 @@ void vtkSlicerPlastimatchLogic
   vtkMRMLVolumeNode* FixedVtkImage =
     vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(GetFixedID()));
   itk::Image<float, 3>::Pointer FixedItkImage = itk::Image<float, 3>::New();
-  SlicerRtCommon::ConvertVolumeNodeToItkImage<float>(FixedVtkImage, FixedItkImage);
+  SlicerRtCommon::ConvertVolumeNodeToItkImageInLPS<float>(FixedVtkImage, FixedItkImage);
 
   vtkMRMLVolumeNode* MovingVtkImage =
     vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(GetMovingID()));
   itk::Image<float, 3>::Pointer MovingItkImage = itk::Image<float, 3>::New();
-  SlicerRtCommon::ConvertVolumeNodeToItkImage<float>(MovingVtkImage, MovingItkImage);
+  SlicerRtCommon::ConvertVolumeNodeToItkImageInLPS<float>(MovingVtkImage, MovingItkImage);
+
+//  itk_rectify_volume_hack (FixedItkImage);
+//  itk_rectify_volume_hack (MovingItkImage);
 
   this->RegistrationData->fixed_image = new Plm_image (FixedItkImage);
   this->RegistrationData->moving_image = new Plm_image (MovingItkImage);
@@ -347,8 +376,16 @@ void vtkSlicerPlastimatchLogic
   
   this->WarpedLandmarks = vtkPoints::New();
 
+
   for (int i=0; i < (int) warpedPointset.count(); i++)
-    {
+  {
+    printf ("[RTN] %g %g %g -> %g %g %g\n",
+            warpedPointset.point_list[i].p[0],
+            warpedPointset.point_list[i].p[1],
+            warpedPointset.point_list[i].p[2],
+            - warpedPointset.point_list[i].p[0],
+            - warpedPointset.point_list[i].p[1],
+            warpedPointset.point_list[i].p[2]);
     this->WarpedLandmarks->InsertPoint(i,
       - warpedPointset.point_list[i].p[0],
       - warpedPointset.point_list[i].p[1],
