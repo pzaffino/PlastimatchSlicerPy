@@ -1,5 +1,6 @@
-import vtkSlicerPlastimatchModuleLogicPython
-reg = vtkSlicerPlastimatchModuleLogicPython.vtkSlicerPlastimatchLogic()
+import vtkSlicerPlastimatchPyModuleLogicPython
+
+reg=vtkSlicerPlastimatchPyModuleLogicPython.vtkSlicerPlastimatchPyModuleLogic()
 
 # Set scene
 reg.SetMRMLScene(slicer.mrmlScene)
@@ -9,8 +10,8 @@ img_fixed = "Img1"
 img_moving = "Img2"
 
 # Set input/output images 
-reg.SetFixedID(getNode(img_fixed).GetID())
-reg.SetMovingID(getNode(img_moving).GetID())
+reg.SetFixedImageID(getNode(img_fixed).GetID())
+reg.SetMovingImageID(getNode(img_moving).GetID())
 reg.SetOutputVolumeID(getNode(img_moving).GetID())
 
 # Add stages and set the parameters

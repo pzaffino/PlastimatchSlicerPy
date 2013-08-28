@@ -1,10 +1,8 @@
-
 #-----------------------------------------------------------------------------
-set(MODULE_NAME Plastimatch)
+set(MODULE_NAME PlastimatchPy)
 set(MODULE_TITLE ${MODULE_NAME})
 
 string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
-
 
 #-----------------------------------------------------------------------------
 find_package(Plastimatch QUIET PATHS ${Plastimatch_DIR} )
@@ -15,7 +13,6 @@ endif()
 
 #-----------------------------------------------------------------------------
 add_subdirectory(Logic)
-add_subdirectory(Widgets)
 
 #-----------------------------------------------------------------------------
 set(MODULE_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_EXPORT")
@@ -24,8 +21,6 @@ set(MODULE_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_EXPORT")
 set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/Logic
   ${CMAKE_CURRENT_BINARY_DIR}/Logic
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
-  ${CMAKE_CURRENT_BINARY_DIR}/Widgets
   ${PLASTIMATCH_INCLUDE_DIRS}
   ${Plastimatch_DIR}
 )
@@ -48,17 +43,7 @@ set(MODULE_UI_SRCS
 
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
-  qSlicer${MODULE_NAME}ModuleWidgets
-  vtkSlicerAnnotationsModuleMRML
-  ${ITK_LIBRARIES}
-  plmbase
-  plmutil
-  plmregister
  )
-
-set(MODULE_RESOURCES
-  Resources/qSlicer${MODULE_NAME}Module.qrc
-  )
 
 #-----------------------------------------------------------------------------
 slicerMacroBuildQtModule(
@@ -70,12 +55,10 @@ slicerMacroBuildQtModule(
   MOC_SRCS ${MODULE_MOC_SRCS}
   UI_SRCS ${MODULE_UI_SRCS}
   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
-  RESOURCES ${MODULE_RESOURCES}
   WITH_GENERIC_TESTS
   )
 
 #-----------------------------------------------------------------------------
-if(BUILD_TESTING)
-  add_subdirectory(Testing)
-endif()
-
+#if(BUILD_TESTING)
+#  add_subdirectory(Testing)
+#endif()

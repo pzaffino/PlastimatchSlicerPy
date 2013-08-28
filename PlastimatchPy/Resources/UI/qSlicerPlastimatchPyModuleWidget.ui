@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>qSlicerPlastimatchModuleWidget</class>
- <widget class="qSlicerWidget" name="qSlicerPlastimatchModuleWidget">
+ <class>qSlicerPlastimatchPyModuleWidget</class>
+ <widget class="qSlicerWidget" name="qSlicerPlastimatchPyModuleWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -15,15 +15,11 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="ctkCollapsibleButton" name="CTKCollapsibleButton" native="true">
-     <property name="text" stdset="0">
+    <widget class="ctkCollapsibleButton" name="CTKCollapsibleButton">
+     <property name="text">
       <string>Display</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="qSlicerPlastimatchFooBarWidget" name="FooBar" native="true"/>
-      </item>
-     </layout>
+     <layout class="QVBoxLayout" name="verticalLayout_3"/>
     </widget>
    </item>
    <item>
@@ -52,12 +48,6 @@
    <class>ctkCollapsibleButton</class>
    <extends>QWidget</extends>
    <header>ctkCollapsibleButton.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>qSlicerPlastimatchFooBarWidget</class>
-   <extends>QWidget</extends>
-   <header>qSlicerPlastimatchFooBarWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
